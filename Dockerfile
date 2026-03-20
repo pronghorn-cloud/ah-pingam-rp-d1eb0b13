@@ -17,16 +17,8 @@ RUN yum install -y python3 make gcc gcc-c++ ca-certificates && \
     yum clean all && \
     rm -rf /var/cache/yum
 
-# Copy and configure cluster CA certificates for npm (if provided)
-# The ca-bundle.crt file is injected via BuildConfig configMap
-COPY ca-bundle.crt* /etc/pki/ca-trust/source/anchors/ 2>/dev/null || true
-RUN update-ca-trust extract 2>/dev/null || true
-
 # Copy package files
 COPY package*.json ./
-
-# Set npm to use system CA certificates for build-time registry access
-ENV NODE_EXTRA_CA_CERTS=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 
 # Install dependencies
 RUN npm ci --only=production && \
