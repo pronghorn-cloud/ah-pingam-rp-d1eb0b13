@@ -1,0 +1,22 @@
+# ImageStream for PingAM Analytics Dashboard
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: ah-pingam-rp
+  labels:
+    app: pingam-analytics
+spec:
+  lookupPolicy:
+    local: true
+  tags:
+    - name: latest
+      annotations:
+        description: "Latest stable release"
+        tags: "nodejs,analytics,ppc64le"
+      from:
+        kind: DockerImage
+        name: image-registry.openshift-image-registry.svc:5000/pingam/ah-pingam-rp:latest
+      importPolicy:
+        scheduled: true
+      referencePolicy:
+        type: Local

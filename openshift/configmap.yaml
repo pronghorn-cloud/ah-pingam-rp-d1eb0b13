@@ -1,0 +1,10 @@
+# ConfigMap for application configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pingam-analytics-config
+  labels:
+    app: pingam-analytics
+data:
+  LOG_LEVEL: "info"
+  CORS_ORIGIN: "https://pingam-analytics.apps.your-cluster.example.com"

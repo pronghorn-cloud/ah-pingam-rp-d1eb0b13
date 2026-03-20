@@ -1,0 +1,51 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Development
+.env
+.env.*
+!.env.example
+
+# Dependencies (will be installed in container)
+node_modules/
+client/node_modules/
+
+# Test files
+coverage/
+*.test.js
+**/*.test.js
+server/tests/
+client/src/**/*.test.js
+jest.config.js
+
+# IDE
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database
+data/
+*.db
+
+# Logs
+logs/
+*.log
+
+# Temporary
+tmp/
+temp/
+
+# OpenShift configs (not needed in image)
+openshift/
+
+# Docker files
+Dockerfile*
+docker-compose*

@@ -1,0 +1,131 @@
+# OpenShift Deployment Configuration for PingAM Analytics Dashboard
+# Optimized for Power Platform (ppc64le)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pingam-analytics
+  labels:
+    app: pingam-analytics
+    app.kubernetes.io/name: pingam-analytics
+    app.kubernetes.io/component: dashboard
+    app.kubernetes.io/part-of: pingam-suite
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pingam-analytics
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: pingam-analytics
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3001"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Node selector for Power platform
+      nodeSelector:
+        kubernetes.io/arch: ppc64le
+      
+      # Security context for OpenShift
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      
+      containers:
+        - name: pingam-analytics
+          image: image-registry.openshift-image-registry.svc:5000/pingam/ah-pingam-rp:latest
+          imagePullPolicy: Always
+          
+          ports:
+            - containerPort: 3001
+              protocol: TCP
+              name: http
+          
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3001"
+            - name: DB_PATH
+              value: "/opt/app-root/data"
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: pingam-analytics-config
+                  key: LOG_LEVEL
+                  optional: true
+            - name: CORS_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: pingam-analytics-config
+                  key: CORS_ORIGIN
+                  optional: true
+          
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          
+          # Liveness probe
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          # Readiness probe
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          
+          # Security context
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+          
+          # Volume mounts for persistent data
+          volumeMounts:
+            - name: data-volume
+              mountPath: /opt/app-root/data
+            - name: log-volume
+              mountPath: /var/log/app
+      
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: pingam-analytics-data
+        - name: log-volume
+          emptyDir: {}
+      
+      # Affinity for high availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: pingam-analytics
+                topologyKey: kubernetes.io/hostname

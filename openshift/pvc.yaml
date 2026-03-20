@@ -1,0 +1,15 @@
+# Persistent Volume Claim for SQLite Database
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pingam-analytics-data
+  labels:
+    app: pingam-analytics
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  # Uncomment and set storage class based on your cluster
+  # storageClassName: managed-premium

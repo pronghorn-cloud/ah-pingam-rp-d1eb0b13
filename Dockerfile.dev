@@ -1,0 +1,42 @@
+# Development Dockerfile - Power Platform (ppc64le)
+# Use for local development with hot reloading
+
+FROM --platform=linux/ppc64le registry.access.redhat.com/ubi8/nodejs-18:latest
+
+LABEL name="ah-pingam-rp-dev" \
+      version="1.0.0-dev" \
+      description="PingAM Analytics Dashboard - Development"
+
+WORKDIR /opt/app-root/src
+
+USER root
+
+# Install build tools for native modules
+RUN yum install -y python3 make gcc gcc-c++ && \
+    yum clean all
+
+# Install nodemon globally for hot reloading
+RUN npm install -g nodemon
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including devDependencies)
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Set ownership
+RUN chown -R 1001:0 /opt/app-root/src && \
+    chmod -R g=u /opt/app-root/src
+
+USER 1001
+
+ENV NODE_ENV=development \
+    PORT=3001 \
+    DB_PATH=/opt/app-root/src/data
+
+EXPOSE 3001 3000
+
+CMD ["npm", "run", "dev"]

@@ -1,0 +1,35 @@
+# OpenShift Service for PingAM Analytics Dashboard
+apiVersion: v1
+kind: Service
+metadata:
+  name: pingam-analytics
+  labels:
+    app: pingam-analytics
+    app.kubernetes.io/name: pingam-analytics
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3001
+      protocol: TCP
+      name: http
+  selector:
+    app: pingam-analytics
+---
+# Headless service for internal DNS
+apiVersion: v1
+kind: Service
+metadata:
+  name: pingam-analytics-headless
+  labels:
+    app: pingam-analytics
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: 3001
+      targetPort: 3001
+      protocol: TCP
+      name: http
+  selector:
+    app: pingam-analytics

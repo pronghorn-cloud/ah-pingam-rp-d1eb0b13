@@ -1,0 +1,37 @@
+# BuildConfig for building from source on OpenShift
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: ah-pingam-rp
+  labels:
+    app: pingam-analytics
+spec:
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/your-org/ah-pingam-rp.git'
+      ref: main
+    contextDir: /
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+      buildArgs:
+        - name: NODE_ENV
+          value: production
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'ah-pingam-rp:latest'
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+  resources:
+    limits:
+      cpu: '2'
+      memory: 4Gi
+    requests:
+      cpu: '1'
+      memory: 2Gi
+  nodeSelector:
+    kubernetes.io/arch: ppc64le

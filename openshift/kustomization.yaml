@@ -1,0 +1,25 @@
+# Kustomization for OpenShift deployment
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: pingam-analytics
+
+resources:
+  - configmap.yaml
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  - route.yaml
+  - imagestream.yaml
+
+commonLabels:
+  app.kubernetes.io/name: pingam-analytics
+  app.kubernetes.io/version: "1.0.0"
+  app.kubernetes.io/component: dashboard
+  app.kubernetes.io/part-of: pingam-suite
+  app.kubernetes.io/managed-by: kustomize
+
+images:
+  - name: ah-pingam-rp
+    newName: image-registry.openshift-image-registry.svc:5000/pingam/ah-pingam-rp
+    newTag: latest
