@@ -69,10 +69,14 @@ ENV NODE_ENV=production \
     DB_PATH=/opt/app-root/src/data \
     LOG_PATH=/var/log/app
 
+# Switch to root to create log directory
+USER root
+
 # Create log directory
 RUN mkdir -p /var/log/app && \
     chown -R 1001:0 /var/log/app && \
     chmod -R g=u /var/log/app
+
 
 # Switch to non-root user (required for OpenShift)
 USER 1001
