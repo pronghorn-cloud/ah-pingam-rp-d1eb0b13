@@ -19,9 +19,8 @@ RUN yum install -y python3 make gcc gcc-c++ ca-certificates && \
 
 # Copy package files
 COPY package*.json ./
-
 # Install dependencies
-RUN npm ci --only=production && \
+RUN npm install --omit=dev && \
     npm cache clean --force
 
 # Copy server source code
@@ -30,7 +29,7 @@ COPY server/ ./server/
 # Copy client and build
 COPY client/package*.json ./client/
 WORKDIR /opt/app-root/src/client
-RUN npm ci && npm cache clean --force
+RUN npm install && npm cache clean --force
 
 COPY client/ ./
 RUN npm run build
