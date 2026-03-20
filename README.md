@@ -261,15 +261,47 @@ cd client && npm test
 | GET | `/auth-events` | List events with pagination |
 | GET | `/auth-events/:id` | Get single event |
 | POST | `/auth-events` | Create event |
-| POST | `/auth-events/bulk` | Bulk create events |
+- **Helmet.js** for HTTP security headers
+- **Rate limiting** on API endpoints
+- **Input validation** using express-validator
+- **Non-root container** execution
+- **TLS termination** at OpenShift route
+- **Security context** constraints
+- **Cluster CA trust store** integration for secure internal communications
 
-#### Sessions
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/sessions` | List sessions |
-| GET | `/sessions/active` | Get active sessions |
-| GET | `/sessions/stats` | Get statistics |
-| POST | `/sessions` | Create session |
+### Cluster TLS Certificate Authority
+
+The application is configured to trust the OpenShift cluster's internal Certificate Authority (CA). This enables secure TLS connections to internal services such as:
+- Internal image registries
+- Internal APIs and services
+- Proxy servers with custom certificates
+
+**How it works:**
+
+1. A ConfigMap (`pingam-analytics-ca-bundle`) is created with the label `config.openshift.io/inject-trusted-cabundle: "true"`
+2. OpenShift automatically injects the cluster's trusted CA bundle into this ConfigMap
+3. The CA bundle is mounted into the container at `/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem`
+4. Node.js uses this CA bundle via the `NODE_EXTRA_CA_CERTS` environment variable
+
+**Build-time CA Trust (npm install):**
+
+The Dockerfile and BuildConfig are also configured to trust cluster CAs during the build process:
+
+1. A separate ConfigMap (`cluster-ca-bundle`) is created for build-time CA injection
+2. The BuildConfig mounts this ConfigMap into the build context
+3. The Dockerfile copies the CA bundle and updates the system trust store
+4. `NODE_EXTRA_CA_CERTS` is set during build for npm to trust internal registries
+
+**Manual CA bundle update (if needed):**
+```bash
+# The CA bundle is automatically managed by OpenShift
+# To verify the CA bundle is injected:
+oc get configmap pingam-analytics-ca-bundle -o yaml
+oc get configmap cluster-ca-bundle -o yaml
+
+# To check the mounted certificate in a running pod:
+oc exec <pod-name> -- cat /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+```
 | PATCH | `/sessions/:id/end` | End session |
 
 #### Metrics

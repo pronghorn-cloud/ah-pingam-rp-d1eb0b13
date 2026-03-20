@@ -12,6 +12,14 @@ spec:
       uri: 'https://github.com/your-org/ah-pingam-rp.git'
       ref: main
     contextDir: /
+    # Inject cluster CA certificates for npm build
+    # The cluster-ca-bundle ConfigMap must have the label:
+    # config.openshift.io/inject-trusted-cabundle: "true"
+    # OpenShift will auto-populate it with ca-bundle.crt containing trusted CAs
+    configMaps:
+      - configMap:
+          name: cluster-ca-bundle
+        destinationDir: .
   strategy:
     type: Docker
     dockerStrategy:

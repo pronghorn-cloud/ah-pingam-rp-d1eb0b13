@@ -1,0 +1,15 @@
+# ConfigMap for Build-time CA Bundle
+# This ConfigMap is used during the Docker build process to trust cluster CAs
+# OpenShift will automatically inject the trusted CA bundle when this label is present
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-ca-bundle
+  labels:
+    app: pingam-analytics
+    config.openshift.io/inject-trusted-cabundle: "true"
+data: {}
+# Note: The 'ca-bundle.crt' key will be automatically populated by OpenShift
+# with the cluster's trusted CA certificates when the label above is set.
+# This ConfigMap is referenced in buildconfig.yaml to inject CA certificates
+# into the Docker build context, allowing npm to trust internal registries.

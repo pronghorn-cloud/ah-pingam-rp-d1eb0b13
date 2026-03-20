@@ -55,6 +55,8 @@ spec:
               value: "3001"
             - name: DB_PATH
               value: "/opt/app-root/data"
+            - name: NODE_EXTRA_CA_CERTS
+              value: "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
             - name: LOG_LEVEL
               valueFrom:
                 configMapKeyRef:
@@ -111,6 +113,9 @@ spec:
               mountPath: /opt/app-root/data
             - name: log-volume
               mountPath: /var/log/app
+            - name: trusted-ca
+              mountPath: /etc/pki/ca-trust/extracted/pem
+              readOnly: true
       
       volumes:
         - name: data-volume
@@ -118,6 +123,13 @@ spec:
             claimName: pingam-analytics-data
         - name: log-volume
           emptyDir: {}
+        - name: trusted-ca
+          configMap:
+            name: pingam-analytics-ca-bundle
+            items:
+              - key: ca-bundle.crt
+                path: tls-ca-bundle.pem
+            optional: true
       
       # Affinity for high availability
       affinity:

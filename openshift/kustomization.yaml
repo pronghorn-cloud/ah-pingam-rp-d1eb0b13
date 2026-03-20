@@ -5,6 +5,8 @@ kind: Kustomization
 namespace: pingam-analytics
 
 resources:
+  - ca-bundle-configmap.yaml
+  - build-ca-bundle-configmap.yaml
   - configmap.yaml
   - pvc.yaml
   - deployment.yaml

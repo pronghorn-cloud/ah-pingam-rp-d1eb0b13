@@ -1,0 +1,16 @@
+# ConfigMap for Cluster CA Bundle
+# OpenShift will automatically inject the trusted CA bundle when this label is present
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pingam-analytics-ca-bundle
+  labels:
+    app: pingam-analytics
+    config.openshift.io/inject-trusted-cabundle: "true"
+data: {}
+# Note: The 'ca-bundle.crt' key will be automatically populated by OpenShift
+# with the cluster's trusted CA certificates when the label above is set.
+# This includes:
+# - The cluster's signing CA
+# - Any additional trusted CAs configured at the cluster level
+# - Proxy CA certificates (if configured)
